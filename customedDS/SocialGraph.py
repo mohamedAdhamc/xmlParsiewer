@@ -1,7 +1,7 @@
-from CustomDict import CustomDict
-from CustomSet import CustomSet
-from CustomDiGraph import CustomDiGraph
+from customedDS.CustomSet import CustomSet
+from customedDS.CustomDict import CustomDict
 from customedDS.User import User
+from customedDS.CustomDiGraph import CustomDiGraph
 
 class SocialGraph:
     """
@@ -114,51 +114,74 @@ class SocialGraph:
                     posts_with_topic.append(post.get('body'))
         return posts_with_topic
 
-    def print_network_analysis(self):
-        """Print a network analysis report for the social graph."""
-        print("Network Analysis:")
-        print("-" * 30)
+    def print_network_analysis(self, user1_id=None, user2_id=None, topic=None):
+        """
+        Perform a network analysis on the social graph.
+
+        Parameters:
+        - user1_id (int): User ID for the first user.
+        - user2_id (int): User ID for the second user.
+        - topic (str): Topic for searching posts.
+
+        Returns:
+        - list: A list of strings containing the network analysis results.
+        """
+        result = []
+        result.append("Network Analysis:")
+        result.append("-" * 30)
 
         # Most Influential User
         influential_user = self.most_influential_user()
         if influential_user:
-            print("Most Influential User:")
-            print(f"User ID: {influential_user.user_id}")
-            print(f"Name: {influential_user.name}")
-            print(f"Number of Followers: {len(influential_user.followers)}")
+            result.append("Most Influential User:")
+            result.append(f"User ID: {influential_user.user_id}")
+            result.append(f"Name: {influential_user.name}")
+            result.append(f"Number of Followers: {len(influential_user.followers)}")
         else:
-            print("No influential user found.")
-        print("-" * 30)
+            result.append("No influential user found.")
+        result.append("-" * 30)
 
         # Most Active User
-        active_user_id = self.most_active_user()
+        if user1_id:
+            active_user_id = user1_id
+        else:
+            active_user_id = self.most_active_user()
+
         if active_user_id:
             active_user = self.users.get(active_user_id)
-            print("Most Active User:")
-            print(f"User ID: {active_user_id}")
-            print(f"Name: {active_user.name}")
-            print(f"Active Score: {len(active_user.followers)}")
+            result.append("Most Active User:")
+            result.append(f"User ID: {active_user_id}")
+            result.append(f"Name: {active_user.name}")
+            result.append(f"Active Score: {len(active_user.followers)}")
         else:
-            print("No active user found.")
-        print("-" * 30)
+            result.append("No active user found.")
+        result.append("-" * 30)
 
         # Mutual Followers
-        user1_id, user2_id = 3, 2
-        mutual_followers = self.mutual_followers(user1_id, user2_id)
-        print(f"Mutual Followers between User {user1_id} and User {user2_id}:")
-        print([follower for follower in mutual_followers])
-        print("-" * 30)
+        if user1_id and user2_id:
+            mutual_followers = self.mutual_followers(user1_id, user2_id)
+            result.append(f"Mutual Followers between User {user1_id} and User {user2_id}:")
+            result.append([follower for follower in mutual_followers])
+        else:
+            result.append("Mutual Followers: Specify user1_id and user2_id to find mutual followers.")
+        result.append("-" * 30)
 
         # Suggested Follows
-        user_id = 1
-        suggested_follows = self.suggested_follows(user_id)
-        print(f"Suggested Follows for User {user_id}:")
-        print([suggested for suggested in suggested_follows])
+        if user1_id:
+            suggested_follows = self.suggested_follows(user1_id)
+            result.append(f"Suggested Follows for User {user1_id}:")
+            result.append([suggested for suggested in suggested_follows])
+        else:
+            result.append("Suggested Follows: Specify user_id to get suggested follows.")
+        result.append("-" * 30)
 
         # Posts by Topic
-        topic = "economy"
-        posts_by_topic = self.search_posts_by_topic(topic)
-        print(f"Posts with Topic '{topic}':")
-        for post in posts_by_topic:
-            print(post)
-        print("-" * 30)
+        if topic:
+            posts_by_topic = self.search_posts_by_topic(topic)
+            result.append(f"Posts with Topic '{topic}':")
+            result.extend(posts_by_topic)
+        else:
+            result.append("Posts by Topic: Specify a topic to search for posts.")
+        result.append("-" * 30)
+
+        return result
