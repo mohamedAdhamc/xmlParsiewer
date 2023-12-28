@@ -1,0 +1,33 @@
+
+
+
+
+
+<users>
+    <user>
+        random content = "more random content" <id   param1="hello  hi"     param2 = "hey" >1< /id >
+        <name  >user1<  / name  >
+        <  posts>
+            <post  >
+                <!--- comment
+            hello multiline comment
+         -->
+                < selfclosingtag    param="something"    />
+                lorem ipsum testing = "test" blah blah <selfclosingtag /  >
+            </  post>
+            <post>stuff
+                <here    random_param= "wee"   last_random_param ="woo">a thing</here>
+                more lorem ipsum more blah blah
+            </post>
+        </posts>
+        <followers>
+            <follower>
+                <id>2</id>
+                <test>hi hellow</test>
+            </follower>
+            <follower>
+                <id>4</id>
+            </follower>
+        </followers>
+    </user>
+</users>
