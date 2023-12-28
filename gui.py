@@ -8,7 +8,7 @@ import os
 #for program features
 from formatting import minify, prettify
 from xml2json import xml2json
-
+from correct_xml import correct_xml
 # Social Network
 from build_graph_network_from_xml import *
 
@@ -19,12 +19,12 @@ class Ui :
 
     def __init__(self):
         self.root = ct.CTk()
-        
+
         #init members
         self.inputPath = ""
 
         #init window dimensions + title
-        self.root.geometry("900x500")
+        self.root.geometry("900x550")
         self.root.title("XML Parsiewer")
 
         #make the first column -> editor textbox and import file button
@@ -46,7 +46,7 @@ class Ui :
         self.convertToJsonButton.grid(row=2, column=1, padx=10, pady=5)
         self.compressButton = ct.CTkButton(self.frame_buttons, text="Compress")
         self.compressButton.grid(row=3, column=1, padx=10, pady=5)
-        self.correctButton = ct.CTkButton(self.frame_buttons, text="Correct XML")
+        self.correctButton = ct.CTkButton(self.frame_buttons, text="Correct XML", command=self.correct_xml)
         self.correctButton.grid(row=4, column=1, padx=10, pady=5)
         self.showErrorsButton = ct.CTkButton(self.frame_buttons, text="Show XML Errors")
         self.showErrorsButton.grid(row=5, column=1, padx=10, pady=5)
@@ -118,8 +118,6 @@ class Ui :
     def minify(self):
         content = self.editor_text_box.get(1.0, tk.END)
 
-        # command to correct content here first, must be mentioned in docs that
-        # only a correct file will be minified
         content = minify(content)
 
         self.output_text_box.configure(state='normal')
@@ -130,8 +128,6 @@ class Ui :
     def xml2json(self):
         content = self.editor_text_box.get(1.0, tk.END)
 
-        # command to correct content here first, must be mentioned in docs that
-        # only a correct file will be converted
         content = xml2json(content)
 
         self.output_text_box.configure(state='normal')
@@ -142,9 +138,17 @@ class Ui :
     def prettify(self):
         content = self.editor_text_box.get(1.0, tk.END)
 
-        # command to correct content here first, must be mentioned in docs that
-        # only a correct file will be prettified
         content = prettify(content)
+
+        self.output_text_box.configure(state='normal')
+        self.output_text_box.delete(1.0, tk.END)
+        self.output_text_box.insert(tk.END, content)
+        self.output_text_box.configure(state='disabled')
+
+    def correct_xml(self):
+        content = self.editor_text_box.get(1.0, tk.END)
+
+        content = correct_xml(content)
 
         self.output_text_box.configure(state='normal')
         self.output_text_box.delete(1.0, tk.END)
@@ -153,11 +157,17 @@ class Ui :
 
     def build_social_graph(self):
         xml_content = self.editor_text_box.get(1.0, tk.END)
-        self.social_graph = build_graph_netowrk_from_xml(xml_content)
-        self.output_text_box.configure(state='normal')
-        self.output_text_box.delete(1.0, tk.END)
-        self.output_text_box.insert(tk.END, "Social graph built successfully.")
-        self.output_text_box.configure(state='disabled')
+        if(correct_xml(xml_content) != prettify(xml_content)):
+            self.output_text_box.configure(state='normal')
+            self.output_text_box.delete(1.0, tk.END)
+            self.output_text_box.insert(tk.END, "File is incorrect, and corrections\nmay not necessarily lead\nto a valid file. Try again with a correct file.")
+            self.output_text_box.configure(state='disabled')
+        else:
+            self.social_graph = build_graph_netowrk_from_xml(xml_content)
+            self.output_text_box.configure(state='normal')
+            self.output_text_box.delete(1.0, tk.END)
+            self.output_text_box.insert(tk.END, "Social graph built successfully.")
+            self.output_text_box.configure(state='disabled')
 
     def visualize_social_graph(self):
         if hasattr(self, 'social_graph'):
@@ -176,6 +186,8 @@ class Ui :
                 self.output_text_box.delete(1.0, tk.END)
                 for post in posts_by_topic:
                     self.output_text_box.insert(tk.END, post + '\n')
+                if (len(posts_by_topic) == 0):
+                    self.output_text_box.insert(tk.END, "No posts with this topic were found.")
                 self.output_text_box.configure(state='disabled')
             else:
                 self.show_error("Please build the social graph first.")
@@ -183,16 +195,23 @@ class Ui :
             self.show_error("Please enter a topic to search for.")
 
     def show_network_analysis(self):
-        # Get user-specified parameters
-        user1_id = int(self.user1Entry.get())
-        user2_id = int(self.user2Entry.get())
-        topic = self.topicEntry.get()
+        xml_content = self.editor_text_box.get(1.0, tk.END)
+        if(correct_xml(xml_content) != prettify(xml_content)):
+            self.output_text_box.configure(state='normal')
+            self.output_text_box.delete(1.0, tk.END)
+            self.output_text_box.insert(tk.END, "File is incorrect, and corrections\nmay not necessarily lead\nto a valid file. Try again with a correct file.")
+            self.output_text_box.configure(state='disabled')
+        else:
+            # Get user-specified parameters
+            user1_id = int(self.user1Entry.get())
+            user2_id = int(self.user2Entry.get())
+            topic = self.topicEntry.get()
 
-        # Perform network analysis with user-specified parameters
-        result = self.social_graph.print_network_analysis(user1_id, user2_id, topic)
+            # Perform network analysis with user-specified parameters
+            result = self.social_graph.print_network_analysis(user1_id, user2_id, topic)
 
-        # Display the result in the output text box
-        self.show_result("Network Analysis", result)
+            # Display the result in the output text box
+            self.show_result("Network Analysis", result)
 
     def show_result(self, title, result):
         self.output_text_box.configure(state='normal')
