@@ -9,7 +9,7 @@ import os
 from formatting import minify, prettify
 from xml2json import xml2json
 from correct_xml import correct_xml
-from xml_checker import XML_error_detector
+from xml_error_detector import XML_error_detector
 # Social Network
 from build_graph_network_from_xml import *
 
