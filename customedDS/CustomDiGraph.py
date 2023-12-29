@@ -150,7 +150,7 @@ class CustomDiGraph:
                     x_target - 0.02 * dx, y_target - 0.02 * dy,
                     0.01 * dx, 0.01 * dy,
                     shape='full', lw=0, length_includes_head=True,
-                    head_width=0.04, head_length=0.04, color='black'
+                    head_width=0.02, head_length=0.05, color='black'
                 )
 
         plt.yticks([])

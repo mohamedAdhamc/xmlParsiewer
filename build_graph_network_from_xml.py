@@ -1,7 +1,6 @@
-from customedDS.SocialGraph import *
 from customedDS.CustomDict import CustomDict
-
 from customedDS.SocialGraph import SocialGraph
+
 import re
 
 def build_graph_netowrk_from_xml(xml_text):

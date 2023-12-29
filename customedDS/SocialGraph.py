@@ -57,7 +57,7 @@ class SocialGraph:
         - user_id: The unique identifier for the user.
         - follower_id: The unique identifier for the follower.
         """
-        if user_id in self.users.Keys() and follower_id in self.users.Keys():
+        if user_id in self.users.Keys():                 # and follower_id in self.users.Keys()
             temp_user = self.users.get(user_id)
             temp_user.add_follower(follower_id)
             self.users.set(user_id, temp_user)
@@ -127,7 +127,6 @@ class SocialGraph:
         - list: A list of strings containing the network analysis results.
         """
         result = []
-        result.append("Network Analysis:")
         result.append("-" * 30)
 
         # Most Influential User
@@ -142,10 +141,10 @@ class SocialGraph:
         result.append("-" * 30)
 
         # Most Active User
-        if user1_id:
-            active_user_id = user1_id
-        else:
-            active_user_id = self.most_active_user()
+        active_user_id = self.most_active_user()
+        if not active_user_id:
+            if user1_id:
+                active_user_id = user1_id
 
         if active_user_id:
             active_user = self.users.get(active_user_id)
@@ -160,8 +159,11 @@ class SocialGraph:
         # Mutual Followers
         if user1_id and user2_id:
             mutual_followers = self.mutual_followers(user1_id, user2_id)
-            result.append(f"Mutual Followers between User {user1_id} and User {user2_id}:")
-            result.append([follower for follower in mutual_followers])
+            if len(mutual_followers) == 0:
+                result.append(f"{user1_id}, {user2_id} : These User IDs are not in the social network (at least one of them). \nCan't Find mutual Followers for NOT existing Users")
+            else:
+                result.append(f"Mutual Followers between User {user1_id} and User {user2_id}:")
+                result.append([follower for follower in mutual_followers])
         else:
             result.append("Mutual Followers: Specify user1_id and user2_id to find mutual followers.")
         result.append("-" * 30)
@@ -169,8 +171,11 @@ class SocialGraph:
         # Suggested Follows
         if user1_id:
             suggested_follows = self.suggested_follows(user1_id)
-            result.append(f"Suggested Follows for User {user1_id}:")
-            result.append([suggested for suggested in suggested_follows])
+            if len(suggested_follows) == 0:
+                result.append(f"{user1_id} : This User ID is not in the social network. \nCan't suggeste Follows for NOT existing Users")
+            else:
+                result.append(f"Suggested Follows for User {user1_id}:")
+                result.append([suggested for suggested in suggested_follows])
         else:
             result.append("Suggested Follows: Specify user_id to get suggested follows.")
         result.append("-" * 30)

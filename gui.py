@@ -155,7 +155,7 @@ class Ui :
         self.output_text_box.delete(1.0, tk.END)
         self.output_text_box.insert(tk.END, content)
         self.output_text_box.configure(state='disabled')
-    
+
     def show_error(self):
         content=self.editor_text_box.get(1.0,tk.END)
 
@@ -234,8 +234,6 @@ class Ui :
         else:
             self.output_text_box.insert(tk.END, "No result found.")
         self.output_text_box.configure(state='disabled')
-
-    
 
 #start app
 Ui()

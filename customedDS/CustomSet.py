@@ -101,3 +101,12 @@ class CustomSet:
         A new set containing elements unique to the current set.
         """
         return CustomSet([elem for elem in self.elements if elem not in other_set])
+    
+    def __repr__(self):
+        """
+        Return the elements in the set as string.
+
+        Returns:
+        The elements in the set as string.
+        """
+        return str(list(self))

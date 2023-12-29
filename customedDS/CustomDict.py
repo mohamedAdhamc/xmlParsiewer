@@ -101,3 +101,12 @@ class CustomDict:
         The number of key-value pairs in the dictionary.
         """
         return len(self.keys)
+
+    def __repr__(self):
+        """
+        Return the key-value pairs in the dictionary as string.
+
+        Returns:
+        The key-value pairs in the dictionary as string.
+        """
+        return str(self.items())
