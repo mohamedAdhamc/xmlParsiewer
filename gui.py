@@ -29,7 +29,7 @@ class Ui :
         self.root.title("XML Parsiewer")
 
         #make the first column -> editor textbox and import file button
-        self.editor_text_box = ct.CTkTextbox(self.root, height=300, width=300, wrap='none')
+        self.editor_text_box = ct.CTkTextbox(self.root, height=450, width=300, wrap='none', undo=True, autoseparators=True)
         self.editor_text_box.grid(row=0, column=0, padx=10, pady=10,sticky='n')
         self.importFileButton = ct.CTkButton(self.root, width=300, text="Import File", command=self.chooseInputFile)
         self.importFileButton.grid(row=1, column=0, padx=10, pady=10)
@@ -49,7 +49,7 @@ class Ui :
         self.compressButton.grid(row=3, column=1, padx=10, pady=5)
         self.correctButton = ct.CTkButton(self.frame_buttons, text="Correct XML", command=self.correct_xml)
         self.correctButton.grid(row=4, column=1, padx=10, pady=5)
-        self.showErrorsButton = ct.CTkButton(self.frame_buttons, text="Show XML Errors",command=self.show_error)
+        self.showErrorsButton = ct.CTkButton(self.frame_buttons, text="Show XML Errors",command=self.show_xml_errors)
         self.showErrorsButton.grid(row=5, column=1, padx=10, pady=5)
 
 
@@ -79,13 +79,16 @@ class Ui :
         self.user2Entry = ct.CTkEntry(self.frame_buttons, width=5)
         self.user2Entry.grid(row=12, column=1, padx=10, pady=5)
 
+        # Attributes used to build and maintain the social graph
+        self.content_that_built_the_graph = None
+        self.social_graph = None
 
         #make third column -> output textbox and save file
-        self.output_text_box = ct.CTkTextbox(self.root, height=300, width=300, state='disabled', wrap='none')
+        self.output_text_box = ct.CTkTextbox(self.root, height=450, width=300, state='disabled', wrap='none')
         self.output_text_box.grid(row=0, column=2, padx=10, pady=10, sticky='n')
-        self.saveFileButton = ct.CTkButton(self.root,  width=300, text="Save File")
+        self.saveFileButton = ct.CTkButton(self.root,  width=300, text="Save File", command=self.choose_output_file)
         self.saveFileButton.grid(row=1, column=2, padx=10, pady=10)
-
+        self.last_function_performed_output_extension = ".txt"
         self.makeResponsive()
 
         #main event loop
@@ -98,6 +101,18 @@ class Ui :
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
         self.root.grid_columnconfigure(2, weight=1)
+
+    # These still need buttons
+    def undo(self):
+        try:
+            self.editor_text_box.edit_undo()
+        except:
+            pass
+    def redo(self):
+        try:
+            self.editor_text_box.edit_redo()
+        except:
+            pass
 
     def chooseInputFile (self):
         file_path = filedialog.askopenfilename(
@@ -116,82 +131,69 @@ class Ui :
                 self.editor_text_box.delete(1.0, tk.END)  # Clear existing content
                 self.editor_text_box.insert(tk.END, content)
 
+    def choose_output_file(self):
+        file_path = filedialog.asksaveasfilename(
+        title="Save File",
+        defaultextension=self.last_function_performed_output_extension,
+        filetypes=[("All files", "*.*")])
+        if file_path:
+            with open(file_path, 'w') as file:
+                text_content = self.output_text_box.get(1.0, tk.END)
+                file.write(text_content)
+
     def minify(self):
         content = self.editor_text_box.get(1.0, tk.END)
-
         content = minify(content)
-
-        self.output_text_box.configure(state='normal')
-        self.output_text_box.delete(1.0, tk.END)
-        self.output_text_box.insert(tk.END, content)
-        self.output_text_box.configure(state='disabled')
+        self.show_output(content)
+        self.last_function_performed_output_extension = ".xml"
 
     def xml2json(self):
         content = self.editor_text_box.get(1.0, tk.END)
-
         content = xml2json(content)
-
-        self.output_text_box.configure(state='normal')
-        self.output_text_box.delete(1.0, tk.END)
-        self.output_text_box.insert(tk.END, content)
-        self.output_text_box.configure(state='disabled')
+        self.show_output(content)
+        self.last_function_performed_output_extension = ".json"
 
     def prettify(self):
         content = self.editor_text_box.get(1.0, tk.END)
-
         content = prettify(content)
-
-        self.output_text_box.configure(state='normal')
-        self.output_text_box.delete(1.0, tk.END)
-        self.output_text_box.insert(tk.END, content)
-        self.output_text_box.configure(state='disabled')
+        self.show_output(content)
+        self.last_function_performed_output_extension = ".xml"
 
     def correct_xml(self):
         content = self.editor_text_box.get(1.0, tk.END)
-
         content = correct_xml(content)
+        self.show_output(content)
+        self.last_function_performed_output_extension = ".xml"
 
-        self.output_text_box.configure(state='normal')
-        self.output_text_box.delete(1.0, tk.END)
-        self.output_text_box.insert(tk.END, content)
-        self.output_text_box.configure(state='disabled')
-
-    def show_error(self):
+    def show_xml_errors(self):
         content=self.editor_text_box.get(1.0,tk.END)
-
         content = XML_error_detector(content)
-
-        self.output_text_box.configure(state='normal')
-        self.output_text_box.delete(1.0, tk.END)
-        self.output_text_box.insert(tk.END, content)
-        self.output_text_box.configure(state='disabled')
+        self.show_output(content)
+        self.last_function_performed_output_extension = ".txt"
 
     def build_social_graph(self):
         xml_content = self.editor_text_box.get(1.0, tk.END)
         if(correct_xml(xml_content) != prettify(xml_content)):
-            self.output_text_box.configure(state='normal')
-            self.output_text_box.delete(1.0, tk.END)
-            self.output_text_box.insert(tk.END, "File is incorrect, and corrections\nmay not necessarily lead\nto a valid file. Try again with a correct file.")
-            self.output_text_box.configure(state='disabled')
+            self.show_error("File is incorrect, and corrections\nmay not necessarily lead\nto a valid file. Try again with a correct file.")
         else:
+            self.content_that_built_the_graph = xml_content
             self.social_graph = build_graph_netowrk_from_xml(xml_content)
-            self.output_text_box.configure(state='normal')
-            self.output_text_box.delete(1.0, tk.END)
-            self.output_text_box.insert(tk.END, "Social graph built successfully.")
-            self.output_text_box.configure(state='disabled')
+            self.show_output("Social graph built successfully.")
 
     def visualize_social_graph(self):
-        if hasattr(self, 'social_graph'):
+        xml_content = self.editor_text_box.get(1.0, tk.END)
+        if (xml_content == self.content_that_built_the_graph):
             self.social_graph.visualize_graph()
         else:
             self.show_error("Please build the social graph first.")
 
+
     def search_posts_by_topic(self):
         # Get the topic from the entry widget
         topic = self.topicEntry.get()
-
+        xml_content = self.editor_text_box.get(1.0, tk.END)
         if topic:
-            if hasattr(self, 'social_graph'):
+            if (xml_content == self.content_that_built_the_graph):
                 posts_by_topic = self.social_graph.search_posts_by_topic(topic)
                 self.output_text_box.configure(state='normal')
                 self.output_text_box.delete(1.0, tk.END)
@@ -200,6 +202,8 @@ class Ui :
                 if (len(posts_by_topic) == 0):
                     self.output_text_box.insert(tk.END, "No posts with this topic were found.")
                 self.output_text_box.configure(state='disabled')
+
+                self.last_function_performed_output_extension = ".txt"
             else:
                 self.show_error("Please build the social graph first.")
         else:
@@ -208,10 +212,9 @@ class Ui :
     def show_network_analysis(self):
         xml_content = self.editor_text_box.get(1.0, tk.END)
         if(correct_xml(xml_content) != prettify(xml_content)):
-            self.output_text_box.configure(state='normal')
-            self.output_text_box.delete(1.0, tk.END)
-            self.output_text_box.insert(tk.END, "File is incorrect, and corrections\nmay not necessarily lead\nto a valid file. Try again with a correct file.")
-            self.output_text_box.configure(state='disabled')
+            self.show_error("File is incorrect, and corrections\nmay not necessarily lead\nto a valid file. Try again with a correct file.")
+        elif (xml_content != self.content_that_built_the_graph):
+            self.show_error("Please build the social graph first.")
         else:
             # Get user-specified parameters
             user1_id = int(self.user1Entry.get())
@@ -223,6 +226,7 @@ class Ui :
 
             # Display the result in the output text box
             self.show_result("Network Analysis", result)
+            self.last_function_performed_output_extension = ".txt"
 
     def show_result(self, title, result):
         self.output_text_box.configure(state='normal')
@@ -233,6 +237,22 @@ class Ui :
                 self.output_text_box.insert(tk.END, f"{item}\n")
         else:
             self.output_text_box.insert(tk.END, "No result found.")
+        self.output_text_box.configure(state='disabled')
+
+
+    # The two functions below are almost identical, but the different names are for clarity
+    def show_error(self, message):
+        # Show error messages in the output text box
+        self.output_text_box.configure(state='normal')
+        self.output_text_box.delete(1.0, tk.END)
+        self.output_text_box.insert(tk.END, message)
+        self.output_text_box.configure(state='disabled')
+        self.last_function_performed_output_extension = ".txt"
+
+    def show_output(self, message):
+        self.output_text_box.configure(state='normal')
+        self.output_text_box.delete(1.0, tk.END)
+        self.output_text_box.insert(tk.END, message)
         self.output_text_box.configure(state='disabled')
 
 #start app
