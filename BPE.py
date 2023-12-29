@@ -1,5 +1,5 @@
-from CustomDict import CustomDict
-from CustomSet import CustomSet
+from customedDS.CustomDict import CustomDict
+from customedDS.CustomSet import CustomSet
 
 class BPE():
     def __init__(self):
