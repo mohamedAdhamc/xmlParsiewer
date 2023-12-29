@@ -157,7 +157,7 @@ class SocialGraph:
         result.append("-" * 30)
 
         # Mutual Followers
-        if user1_id and user2_id:
+        if isinstance(user1_id, int) and isinstance(user2_id, int):
             mutual_followers = self.mutual_followers(user1_id, user2_id)
             if len(mutual_followers) == 0:
                 result.append(f"{user1_id}, {user2_id} : These User IDs are not in the social network (at least one of them). \nCan't Find mutual Followers for NOT existing Users")

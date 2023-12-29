@@ -18,7 +18,7 @@ class CustomDict:
         - size (int): The initial size of the list of buckets.
         - buckets (list): A list of buckets, where each bucket is a list of key-value pairs.
         """
-        self.size = 1000  # Choose an initial size for the list of buckets
+        self.size = 100  # Choose an initial size for the list of buckets
         self.buckets = [[] for _ in range(self.size)]
 
     def hash_function(self, key):

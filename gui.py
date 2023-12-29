@@ -217,8 +217,8 @@ class Ui :
             self.show_error("Please build the social graph first.")
         else:
             # Get user-specified parameters
-            user1_id = int(self.user1Entry.get())
-            user2_id = int(self.user2Entry.get())
+            user1_id = self.user1Entry.get()
+            user2_id = self.user2Entry.get()
             topic = self.topicEntry.get()
 
             # Perform network analysis with user-specified parameters
