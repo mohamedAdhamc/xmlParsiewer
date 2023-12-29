@@ -12,13 +12,13 @@ class CustomDict:
         Initialize an empty CustomDict.
 
         The CustomDict is implemented as a hash table with a list of buckets.
-        The initial size of the hash table is set to 100.
+        The initial size of the hash table is set to 4999.
 
         Attributes:
         - size (int): The initial size of the list of buckets.
         - buckets (list): A list of buckets, where each bucket is a list of key-value pairs.
         """
-        self.size = 100  # Choose an initial size for the list of buckets
+        self.size = 4999  # Choose an initial size for the list of buckets
         self.buckets = [[] for _ in range(self.size)]
 
     def hash_function(self, key):
@@ -26,7 +26,7 @@ class CustomDict:
         Custom hash function for both strings and numbers.
 
         Parameters:
-        - key: The key (either string or number) to be hashed.
+        - key: The key (either string or number or bytes) to be hashed.
 
         Returns:
         An integer hash value computed based on the input key.
@@ -36,6 +36,13 @@ class CustomDict:
             hash_value = 0
             for char in key:
                 hash_value = (hash_value * 31 + ord(char)) % self.size
+
+        elif isinstance(key, bytes):
+            # Handle bytes keys
+            hash_value = 0
+            for char in key:
+                hash_value = (hash_value * 31 + int(char)) % self.size
+
         else:
             # Handle numeric keys
             hash_value = key % self.size
