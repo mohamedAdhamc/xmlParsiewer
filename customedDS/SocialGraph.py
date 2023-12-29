@@ -183,8 +183,11 @@ class SocialGraph:
         # Posts by Topic
         if topic:
             posts_by_topic = self.search_posts_by_topic(topic)
-            result.append(f"Posts with Topic '{topic}':")
-            result.extend(posts_by_topic)
+            if len(posts_by_topic) == 0:
+                result.append(f"No posts with topic: {topic} were found.")
+            else:
+                result.append(f"Posts with Topic '{topic}':")
+                result.extend(posts_by_topic)
         else:
             result.append("Posts by Topic: Specify a topic to search for posts.")
         result.append("-" * 30)
