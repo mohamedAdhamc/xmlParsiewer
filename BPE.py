@@ -2,6 +2,31 @@ from customedDS.CustomDict import CustomDict
 from customedDS.CustomSet import CustomSet
 
 class BPE():
+    """
+    Class for byte pair encoding compression algorithm
+    -   BPE works by scanning the bytes of the incoming text,
+        and replacing the most common pair with a single, unused byte.
+
+    -   This process is repeated until we either run out of available bytes,
+        or there are no more frequent pairs (Max frequency = 1)
+
+    -   Since a single byte can represent 256 characters, we build a list
+        of reserved and available characters
+    
+    -   The resulting map is appended to the output file, to enable a 
+        lossless file decompression
+    
+    Methods:
+    --------
+    - compress(text: str):
+        Method for compressing an input string and saving the output to a file
+        Returns: void
+
+    - decompress(filename: str):
+        Method for loading a file and decompressing it back to text
+        Returns: str
+    """
+
     def __init__(self):
         self.__lookup_table = CustomDict()
         self.__raw_file_data: bytes = None
@@ -18,7 +43,7 @@ class BPE():
         replacement = self.__available_characters.pop(0)
         return replacement.to_bytes(1, byteorder="big")
 
-    def __get_original(self, b: bytes, table: dict):
+    def __get_original(self, b: bytes, table):
         """Check if the byte is in the lookup table and get the original byte before decompression"""
 
         if (b in table.Keys()):
@@ -27,7 +52,9 @@ class BPE():
             return b1 + b2
         return b
 
-    def __max_pair(self, data: dict):
+    def __max_pair(self, data):
+        """Find the most frequent pair in the input dictionary"""
+
         max_freq = 0
         for key, freq in data.items():
             if (freq >= max_freq):
@@ -36,28 +63,31 @@ class BPE():
         return max_pair, max_freq
 
     def __reconstruct_dict(self, data: bytes):
-        """Used to reconstruct the lookup table from the data found in the compressed file"""
+        """Reconstruct the lookup table from the data in the compressed file"""
+
         byte_len = data[0]
         table_chunk = data[(-3 * byte_len):]
 
         table = CustomDict()
         for i in range(0, 3 * byte_len, 3):
             table.set(table_chunk[i].to_bytes(), table_chunk[i + 1].to_bytes() + table_chunk[i + 2].to_bytes())
-
         return table
 
-    def compress_binary(self, text: str):
+    def compress(self, text: str):
         """Convert text to binary to compress it"""
+
         self.__raw_file_data = bytearray(text, "utf-8")
         self.__unique_file_data.update(self.__raw_file_data)
         for b in self.__unique_file_data:
             self.__reserved_characters.append(b)
         self.__available_characters = [c for c in range(256) if c not in self.__reserved_characters]
 
-        # Placeholder for the highest occuring object in the last loop
+        # Placeholder for the most frequent object in the last loop
         last_pair_frequency = 0
         data_len = len(self.__raw_file_data)
         compressed_data = self.__raw_file_data
+
+        # Break if file cannot be compressed further
         while (last_pair_frequency != 1):
             # pairs = {}
             pairs = CustomDict()
@@ -73,6 +103,7 @@ class BPE():
                     # pairs[pair] = 1
                     pairs.set(pair, 1)
 
+            # Try to find a replacement byte from the available characters
             try:
                 replacement = self.__get_replacement()
             except Exception as e:
@@ -94,13 +125,13 @@ class BPE():
             # Write length of the bytes used for compression
             compressed_file.write(replacement_length)
             compressed_file.write(compressed_data)
-            
+
             # Add the lookup table as overhead at the end of the file
             for key, value in self.__lookup_table.items():
                 compressed_file.write(key + value)
 
-    def decompress_binary(self, filename: str):
-        """ Decompress the file back tp its original format """
+    def decompress(self, filename: str):
+        """ Decompress the file back to its original format """
         
         with open(file=filename, mode="rb") as file_binary:
             compressed_file_data = file_binary.read()
@@ -122,5 +153,5 @@ xip = BPE()
 
 with open(file="/home/mahmoud/Work/Uni/DSA/Project/sample.xml", mode="r") as file:
     text = file.read()
-xip.compress_binary(text)
-xip.decompress_binary("output.xip")
+xip.compress(text)
+xip.decompress("output.xip")
