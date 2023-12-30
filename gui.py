@@ -51,9 +51,11 @@ class Ui :
         self.compressButton = ct.CTkButton(self.frame_buttons, text="Compress", command=self.compress)
         self.compressButton.grid(row=3, column=0, padx=10, pady=5, columnspan=2)
 
-        # Add an entry widget for number of iterations
-        self.iterations = ct.CTkEntry(self.frame_buttons, width=100)
-        self.iterations.grid(row=4, column=0, padx=10, pady=5, columnspan=2)
+        # Add entry widgets for user IDs
+        self.iterations = ct.CTkEntry(self.frame_buttons, width=50)
+        self.iterations.grid(row=4, column=1, padx=10, pady=5)
+        self.iterationsText = ct.CTkLabel(self.frame_buttons, text ="Max iters.", padx = 5, pady = 5)
+        self.iterationsText.grid(row=4, column=0, padx=10, pady=5)
 
         self.decompressButton = ct.CTkButton(self.frame_buttons, text="Decompress", command=self.decompress)
         self.decompressButton.grid(row=5, column=0, padx=10, pady=5, columnspan=2)
