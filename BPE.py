@@ -76,7 +76,7 @@ class BPE():
             value_bytes.append(table_chunk[i + 1].to_bytes() + table_chunk[i + 2].to_bytes())
         return key_bytes, value_bytes
 
-    def compress(self, text: str, iterations: int):
+    def compress(self, text: str, file_path, iterations = None):
         """Convert text to binary to compress it"""
         self.__raw_file_data = bytearray(text, "utf-8")
         self.__unique_file_data = reduce(lambda l, x: l.append(x) or l if x not in l else l, self.__raw_file_data, [])
@@ -87,9 +87,15 @@ class BPE():
         data_len = len(self.__raw_file_data)
         compressed_data = self.__raw_file_data
         _iter = 0
+        iterate = True
+        if iterations == "":
+            iterations = None
+        elif iterations != "":
+            iterations = int(iterations)
 
         # Break if file cannot be compressed further
-        while (last_pair_frequency != 1 or _iter < iterations):
+        while (last_pair_frequency != 1 and iterate):
+            print(_iter, iterations)
             # Loop through the data and count frequencies
             self.__frequencies = [0] * 256 * 256
             for i in range(data_len - 1):
@@ -122,11 +128,13 @@ class BPE():
             # Replace two bytes with a single byte
             compressed_data = compressed_data.replace(highest_occuring_pair, replacement)
             data_len = len(compressed_data)
-            _iter += 1
+            if iterations != None:
+                _iter += 1
+                iterate = _iter < iterations
 
         replacement_length = (len(self.__lookup_table)).to_bytes()
 
-        with open(file="output.xip", mode="wb") as compressed_file:
+        with open(file=file_path+".xip", mode="wb") as compressed_file:
             # Write length of the bytes used for compression
             compressed_file.write(replacement_length)
             compressed_file.write(compressed_data)
@@ -150,13 +158,14 @@ class BPE():
         for i in range(1, data_len):
             decompressed_data += self.__get_original(compressed_file_data[i].to_bytes(), reconstruction_keys, reconstruction_values)
 
-        with open(file=filename.replace(".xip", "_decompressed.xml"), mode="wb") as decompressed_file:
-            decompressed_file.write(decompressed_data)
+        return decompressed_data.decode("utf8")
+        # with open(file=filename.replace(".xip", "_decompressed.xml"), mode="wb") as decompressed_file:
+        #     decompressed_file.write(decompressed_data)
 
-xip = BPE()
+# xip = BPE()
 
-with open(file="/home/mahmoud/Work/Uni/DSA/Project/xmlParsiewer/test_files/generic_syntactically_correct2.xml", mode="r") as file:
-    text = file.read()
-xip.compress(text, 10)
-print("compressed")
-xip.decompress("output.xip")
+# with open(file="/home/mahmoud/Work/Uni/DSA/Project/xmlParsiewer/test_files/generic_syntactically_correct1.xml", mode="r") as file:
+#     text = file.read()
+# xip.compress(text)
+# print("compressed")
+# xip.decompress("output.xip")

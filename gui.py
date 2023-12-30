@@ -12,6 +12,9 @@ from correct_xml import correct_xml
 from xml_error_detector import XML_error_detector
 # Social Network
 from build_graph_network_from_xml import *
+# Compression
+from BPE import BPE
+bpe = BPE()
 
 ct.set_appearance_mode("system")  # Modes: system (default), light, dark
 ct.set_default_color_theme("dark-blue")  # Themes: blue (default), dark-blue, green
@@ -151,6 +154,24 @@ class Ui :
             with open(file_path, 'w') as file:
                 text_content = self.output_text_box.get(1.0, tk.END)
                 file.write(text_content)
+
+    def compress(self):
+        file_path = filedialog.asksaveasfilename(
+        title="Save File",
+        defaultextension=self.last_function_performed_output_extension,
+        filetypes=[("All files", "*.xip")])
+        if file_path:
+            text_content = self.output_text_box.get(1.0, tk.END)
+            bpe.compress(text_content, file_path[:len(file_path)-4], self.iterations.get())
+
+    def decompress(self):
+        file_path = filedialog.askopenfilename(
+        title="Open File",
+        filetypes=[("All files", "*.xip")])
+        if file_path:
+            content = bpe.decompress(file_path)
+            self.editor_text_box.delete(1.0, tk.END)  # Clear existing content
+            self.editor_text_box.insert(tk.END, content)
 
     def minify(self):
         content = self.editor_text_box.get(1.0, tk.END)
