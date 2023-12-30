@@ -1,5 +1,13 @@
+# from functools import reduce
 from customedDS.CustomDict import CustomDict
-from customedDS.CustomSet import CustomSet
+
+def reduce(function, sequence, initial):
+    it = iter(sequence)
+    value = initial
+    for element in it:
+        value = function(value, element)
+
+    return value
 
 class BPE():
     """
@@ -30,9 +38,10 @@ class BPE():
     def __init__(self):
         self.__lookup_table = CustomDict()
         self.__raw_file_data: bytes = None
-        self.__unique_file_data: bytes = CustomSet()
-        self.__reserved_characters = []
+        self.__unique_file_data = []
         self.__available_characters = []
+        self.__frequencies = [0] * 256 * 256
+        self.__all_bytes = [i.to_bytes() for i in range(256)]
 
     def __get_replacement(self) -> bytes:
         """ Get a replacement byte from available characters"""
@@ -52,16 +61,6 @@ class BPE():
             return b1 + b2
         return b
 
-    def __max_pair(self, data):
-        """Find the most frequent pair in the input dictionary"""
-
-        max_freq = 0
-        for key, freq in data.items():
-            if (freq >= max_freq):
-                max_freq = freq
-                max_pair = key
-        return max_pair, max_freq
-
     def __reconstruct_dict(self, data: bytes):
         """Reconstruct the lookup table from the data in the compressed file"""
 
@@ -75,12 +74,9 @@ class BPE():
 
     def compress(self, text: str):
         """Convert text to binary to compress it"""
-
         self.__raw_file_data = bytearray(text, "utf-8")
-        self.__unique_file_data.update(self.__raw_file_data)
-        for b in self.__unique_file_data:
-            self.__reserved_characters.append(b)
-        self.__available_characters = [c for c in range(256) if c not in self.__reserved_characters]
+        self.__unique_file_data = reduce(lambda l, x: l.append(x) or l if x not in l else l, self.__frequencies, [])
+        self.__available_characters = [c for c in range(256) if c not in self.__unique_file_data]
 
         # Placeholder for the most frequent object in the last loop
         last_pair_frequency = 0
@@ -89,19 +85,13 @@ class BPE():
 
         # Break if file cannot be compressed further
         while (last_pair_frequency != 1):
-            # pairs = {}
-            pairs = CustomDict()
-            # Loop through the data and make a pair-freqency dict
+            # Loop through the data and count frequencies
+            self.__frequencies = [0] * 256 * 256
             for i in range(data_len - 1):
                 first_iter = compressed_data[i]
                 second_iter = compressed_data[i + 1]
-                pair = first_iter.to_bytes() + second_iter.to_bytes()
-                if (pair in pairs):
-                    # pairs[pair] += 1
-                    pairs.set(pair, pairs.get(pair) + 1)
-                else:
-                    # pairs[pair] = 1
-                    pairs.set(pair, 1)
+                index = first_iter * 256 + second_iter
+                self.__frequencies[index] += 1
 
             # Try to find a replacement byte from the available characters
             try:
@@ -110,8 +100,17 @@ class BPE():
                 print(e)
                 break
 
-            highest_occuring_pair, last_pair_frequency = self.__max_pair(pairs)
+            max_val = 0
+            index_max = 0 # Index of most frequent pair
+            for i in range(len(self.__frequencies)):
+                if self.__frequencies[i] > max_val:
+                    max_val = self.__frequencies[i]
+                    index_max = i
+            last_pair_frequency = self.__frequencies[index_max] # Count of pair in data
 
+            first = (index_max // 256)
+            second = (index_max % 256)
+            highest_occuring_pair = self.__all_bytes[first] + self.__all_bytes[second]
             # Add the chosen byte to the lookup table
             self.__lookup_table.set(replacement, highest_occuring_pair)
 
@@ -151,7 +150,7 @@ class BPE():
 
 xip = BPE()
 
-with open(file="/home/mahmoud/Work/Uni/DSA/Project/sample.xml", mode="r") as file:
+with open(file="/home/mahmoud/Work/Uni/DSA/Project/xmlParsiewer/test_files/generic_syntactically_correct3.xml", mode="r") as file:
     text = file.read()
 xip.compress(text)
-xip.decompress("output.xip")
+# xip.decompress("output.xip")
