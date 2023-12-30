@@ -54,12 +54,12 @@ class BPE():
         replacement = self.__available_characters.pop(0)
         return replacement.to_bytes(1, byteorder="big")
 
-    def __get_original(self, b: bytes, reconstruction_keys, reconstruction_values):
+    def __get_original(self, b: bytes, table):
         """Check if the byte is in the lookup table and get the original byte before decompression"""
 
-        if b in reconstruction_keys:
-            b1 = self.__get_original(reconstruction_values[reconstruction_keys.index(b)][0].to_bytes(), reconstruction_keys, reconstruction_values)
-            b2 = self.__get_original(reconstruction_values[reconstruction_keys.index(b)][1].to_bytes(), reconstruction_keys, reconstruction_values)
+        if (b in table.Keys()):
+            b1 = self.__get_original(table.get(b)[0].to_bytes(), table)
+            b2 = self.__get_original(table.get(b)[1].to_bytes(), table)
             return b1 + b2
         return b
 
@@ -69,12 +69,10 @@ class BPE():
         byte_len = data[0]
         table_chunk = data[(-3 * byte_len):]
 
-        key_bytes = []
-        value_bytes = []
+        table = CustomDict()
         for i in range(0, 3 * byte_len, 3):
-            key_bytes.append(table_chunk[i].to_bytes())
-            value_bytes.append(table_chunk[i + 1].to_bytes() + table_chunk[i + 2].to_bytes())
-        return key_bytes, value_bytes
+            table.set(table_chunk[i].to_bytes(), table_chunk[i + 1].to_bytes() + table_chunk[i + 2].to_bytes())
+        return table
 
     def compress(self, text: str, file_path, iterations = None):
         """Convert text to binary to compress it"""
@@ -90,12 +88,11 @@ class BPE():
         iterate = True
         if iterations == "":
             iterations = None
-        elif iterations != "":
+        elif iterations != "" and iterations != None:
             iterations = int(iterations)
 
         # Break if file cannot be compressed further
         while (last_pair_frequency != 1 and iterate):
-            print(_iter, iterations)
             # Loop through the data and count frequencies
             self.__frequencies = [0] * 256 * 256
             for i in range(data_len - 1):
@@ -142,6 +139,7 @@ class BPE():
             # Add the lookup table as overhead at the end of the file
             for key, value in self.__lookup_table.items():
                 compressed_file.write(key + value)
+            print("Compressed!")
     def decompress(self, filename: str):
         """ Decompress the file back to its original format """
         
@@ -151,21 +149,23 @@ class BPE():
         decompressed_data = b""
 
         # Use the redundant information to construct dict before decompression
-        reconstruction_keys, reconstruction_values = self.__reconstruct_dict(compressed_file_data)
-        data_len = len(compressed_file_data) - len(reconstruction_keys) * 3
+        reconstruction_dict = self.__reconstruct_dict(compressed_file_data)
+        data_len = len(compressed_file_data) - len(reconstruction_dict) * 3
 
         # Iterate through every file in the compressed file and find every byte in the lookup table recursively
         for i in range(1, data_len):
-            decompressed_data += self.__get_original(compressed_file_data[i].to_bytes(), reconstruction_keys, reconstruction_values)
+            decompressed_data += self.__get_original(compressed_file_data[i].to_bytes(), reconstruction_dict)
 
+        print("Decompressed!")
         return decompressed_data.decode("utf8")
         # with open(file=filename.replace(".xip", "_decompressed.xml"), mode="wb") as decompressed_file:
-        #     decompressed_file.write(decompressed_data)
+            # decompressed_file.write(decompressed_data)
 
 # xip = BPE()
 
-# with open(file="/home/mahmoud/Work/Uni/DSA/Project/xmlParsiewer/test_files/generic_syntactically_correct1.xml", mode="r") as file:
+# with open(file="/home/mahmoud/Work/Uni/DSA/Project/sample2.xml", mode="r") as file:
 #     text = file.read()
-# xip.compress(text)
+# xip.compress(text, "out")
 # print("compressed")
-# xip.decompress("output.xip")
+# xip.decompress("out.xip")
+# print(xip.decompress("out.xip")[:200])
