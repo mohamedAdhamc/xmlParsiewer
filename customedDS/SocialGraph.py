@@ -126,6 +126,11 @@ class SocialGraph:
         Returns:
         - list: A list of strings containing the network analysis results.
         """
+        if user1_id:
+            user1_id = int(user1_id)
+        if user2_id:
+            user2_id = int(user2_id)
+
         result = []
         result.append("-" * 30)
 
