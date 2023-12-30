@@ -25,11 +25,11 @@ class Ui :
         self.inputPath = ""
 
         #init window dimensions + title
-        self.root.geometry("900x550")
+        self.root.geometry("900x600")
         self.root.title("XML Parsiewer")
 
         #make the first column -> editor textbox and import file button
-        self.editor_text_box = ct.CTkTextbox(self.root, height=450, width=300, wrap='none', undo=True, autoseparators=True)
+        self.editor_text_box = ct.CTkTextbox(self.root, height=520, width=300, wrap='none', undo=True, autoseparators=True)
         self.editor_text_box.grid(row=0, column=0, padx=10, pady=10,sticky='n')
         self.importFileButton = ct.CTkButton(self.root, width=300, text="Import File", command=self.chooseInputFile)
         self.importFileButton.grid(row=1, column=0, padx=10, pady=10)
@@ -38,53 +38,64 @@ class Ui :
         #make feature buttons -> second column
         # Create a frame for the second column buttons
         self.frame_buttons = ct.CTkFrame(self.root)
-        self.frame_buttons.grid(row=0, column=1, rowspan=5, padx=10, pady=10, sticky='n')
+        self.frame_buttons.grid(row=0, column=1, padx=10, pady=10, sticky='n')
         self.minifyButton = ct.CTkButton(self.frame_buttons, text="Minify", command=self.minify)
-        self.minifyButton.grid(row=0, column=1, padx=10, pady=5)
+        self.minifyButton.grid(row=0, column=0, padx=10, pady=5, columnspan=2)
         self.prettifyButton = ct.CTkButton(self.frame_buttons, text="Prettify", command=self.prettify)
-        self.prettifyButton.grid(row=1, column=1, padx=10, pady=5)
+        self.prettifyButton.grid(row=1, column=0, padx=10, pady=5, columnspan=2)
         self.convertToJsonButton = ct.CTkButton(self.frame_buttons, text="Convert to JSON", command=self.xml2json)
-        self.convertToJsonButton.grid(row=2, column=1, padx=10, pady=5)
+        self.convertToJsonButton.grid(row=2, column=0, padx=10, pady=5, columnspan=2)
         self.compressButton = ct.CTkButton(self.frame_buttons, text="Compress")
-        self.compressButton.grid(row=3, column=1, padx=10, pady=5)
+        self.compressButton.grid(row=3, column=0, padx=10, pady=5, columnspan=2)
         self.correctButton = ct.CTkButton(self.frame_buttons, text="Correct XML", command=self.correct_xml)
-        self.correctButton.grid(row=4, column=1, padx=10, pady=5)
+        self.correctButton.grid(row=4, column=0, padx=10, pady=5, columnspan=2)
         self.showErrorsButton = ct.CTkButton(self.frame_buttons, text="Show XML Errors",command=self.show_xml_errors)
-        self.showErrorsButton.grid(row=5, column=1, padx=10, pady=5)
+        self.showErrorsButton.grid(row=5, column=0, padx=10, pady=5, columnspan=2)
 
 
         # Add a button to parse XML and build the social graph
         self.buildGraphButton = ct.CTkButton(self.frame_buttons, text="Build Social Graph", command=self.build_social_graph)
-        self.buildGraphButton.grid(row=6, column=1, padx=10, pady=5)
+        self.buildGraphButton.grid(row=6, column=0, padx=10, pady=5, columnspan=2)
 
         # Add a button to visualize the social graph
         self.visualizeGraphButton = ct.CTkButton(self.frame_buttons, text="Visualize Social Graph", command=self.visualize_social_graph)
-        self.visualizeGraphButton.grid(row=7, column=1, padx=10, pady=5)
+        self.visualizeGraphButton.grid(row=7, column=0, padx=10, pady=5, columnspan=2)
 
         # Add a button to search for posts by topic
         self.searchPostsButton = ct.CTkButton(self.frame_buttons, text="Search Posts by Topic", command=self.search_posts_by_topic)
-        self.searchPostsButton.grid(row=8, column=1, padx=10, pady=5)
+        self.searchPostsButton.grid(row=8, column=0, padx=10, pady=5, columnspan=2)
 
         # Add an entry widget for the topic
         self.topicEntry = ct.CTkEntry(self.frame_buttons, width=100)
-        self.topicEntry.grid(row=9, column=1, padx=10, pady=5)
+        self.topicEntry.grid(row=9, column=0, padx=10, pady=5, columnspan=2)
 
         # Add a button to print the network analysis report
         self.networkAnalysisButton = ct.CTkButton(self.frame_buttons, text="Network Analysis", command=self.show_network_analysis)
-        self.networkAnalysisButton.grid(row=10, column=1, padx=10, pady=5)
+        self.networkAnalysisButton.grid(row=10, column=0, padx=10, pady=5, columnspan=2)
 
         # Add entry widgets for user IDs
-        self.user1Entry = ct.CTkEntry(self.frame_buttons, width=5)
+        self.user1Entry = ct.CTkEntry(self.frame_buttons, width=50)
         self.user1Entry.grid(row=11, column=1, padx=10, pady=5)
-        self.user2Entry = ct.CTkEntry(self.frame_buttons, width=5)
+        self.user1ID = ct.CTkLabel(self.frame_buttons, text ="User1 ID:", padx = 5, pady = 5)
+        self.user1ID.grid(row=11, column=0, padx=10, pady=5)
+
+        self.user2Entry = ct.CTkEntry(self.frame_buttons, width=50)
         self.user2Entry.grid(row=12, column=1, padx=10, pady=5)
+        self.user2ID = ct.CTkLabel(self.frame_buttons, text ="User2 ID:", padx = 5, pady = 5)
+        self.user2ID.grid(row=12, column=0, padx=10, pady=5)
 
         # Attributes used to build and maintain the social graph
         self.content_that_built_the_graph = None
         self.social_graph = None
 
+
+        self.undo_button = ct.CTkButton(self.frame_buttons, width=50, text="Undo", command=self.undo)
+        self.undo_button.grid(row=13, column=0, padx=5, pady=5)
+        self.redo_button = ct.CTkButton(self.frame_buttons, width=50, text="Redo", command=self.redo)
+        self.redo_button.grid(row=13, column=1, padx=5, pady=5)
+
         #make third column -> output textbox and save file
-        self.output_text_box = ct.CTkTextbox(self.root, height=450, width=300, state='disabled', wrap='none')
+        self.output_text_box = ct.CTkTextbox(self.root, height=520, width=300, state='disabled', wrap='none')
         self.output_text_box.grid(row=0, column=2, padx=10, pady=10, sticky='n')
         self.saveFileButton = ct.CTkButton(self.root,  width=300, text="Save File", command=self.choose_output_file)
         self.saveFileButton.grid(row=1, column=2, padx=10, pady=10)
