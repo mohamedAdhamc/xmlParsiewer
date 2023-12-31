@@ -92,12 +92,12 @@ class SocialGraph:
         """Find the mutual followers between two users in the social graph."""
         if user_id1 in self.users and user_id2 in self.users:
             return self.users.get(user_id1).followers.intersection(self.users.get(user_id2).followers)
-        return CustomSet()
+        return None
 
     def suggested_follows(self, user_id):
         """Suggest followers for a user in the social graph."""
         if user_id not in self.users:
-            return CustomSet()
+            return None
         suggested = CustomSet()
         for follower_id in self.users.get(user_id).followers:
             suggested.update(self.users.get(follower_id).followers)
@@ -126,10 +126,14 @@ class SocialGraph:
         Returns:
         - list: A list of strings containing the network analysis results.
         """
-        if user1_id:
+        if not any(char.isalpha() for char in user1_id):
             user1_id = int(user1_id)
-        if user2_id:
+        else:
+            user1_id = "Invalid Id1"
+        if not any(char.isalpha() for char in user2_id):
             user2_id = int(user2_id)
+        else:
+            user2_id = "Invalid Id2"
 
         result = []
         result.append("-" * 30)
@@ -161,28 +165,42 @@ class SocialGraph:
             result.append("No active user found.")
         result.append("-" * 30)
 
-        # Mutual Followers
-        if isinstance(user1_id, int) and isinstance(user2_id, int):
-            mutual_followers = self.mutual_followers(user1_id, user2_id)
-            if len(mutual_followers) == 0:
-                result.append(f"{user1_id}, {user2_id} : These User IDs are not in the social network (at least one of them). \nCan't Find mutual Followers for NOT existing Users")
-            else:
-                result.append(f"Mutual Followers between User {user1_id} and User {user2_id}:")
-                result.append([follower for follower in mutual_followers])
+        if user1_id == "Invalid Id1":
+            result.append("Invalid User ID1.")
+            if user2_id == "Invalid Id2":
+                result.append("Invalid User ID2.")
         else:
-            result.append("Mutual Followers: Specify user1_id and user2_id to find mutual followers.")
-        result.append("-" * 30)
+            if  user2_id != "Invalid Id2":
+                # Mutual Followers
+                if isinstance(user1_id, int) and isinstance(user2_id, int):
+                    mutual_followers = self.mutual_followers(user1_id, user2_id)
+                    if mutual_followers == None:
+                        result.append(f"{user1_id}, {user2_id} : These User are not in the social \nnetwork (at least one of them). \nCan't Find mutual Followers for \nNOT existing Users")
+                    else:
+                        if len(mutual_followers) == 0:
+                            result.append(f"{user1_id}, {user2_id} : These User IDs Don't \nhave any Find mutual Followers")
+                        else:
+                            result.append(f"Mutual Followers between User {user1_id} and User {user2_id}:")
+                            result.append([follower for follower in mutual_followers])
+                else:
+                    result.append("Mutual Followers: Specify user1_id and user2_id to find mutual followers.")
+            else:
+                result.append("Invalid User ID2.")
+            result.append("-" * 30)
 
-        # Suggested Follows
-        if user1_id:
-            suggested_follows = self.suggested_follows(user1_id)
-            if len(suggested_follows) == 0:
-                result.append(f"{user1_id} : This User ID is not in the social network. \nCan't suggeste Follows for NOT existing Users")
+            # Suggested Follows
+            if user1_id:
+                suggested_follows = self.suggested_follows(user1_id)
+                if suggested_follows == None:
+                    result.append(f"{user1_id} : This User ID is not in the social network. \nCan't suggeste Follows for NOT existing Users")
+                else:
+                    if len(suggested_follows) == 0:
+                        result.append(f"No suitable sugestions found for the given User ID: {user1_id}")
+                    else:
+                        result.append(f"Suggested Follows for User {user1_id}:")
+                        result.append([suggested for suggested in suggested_follows])
             else:
-                result.append(f"Suggested Follows for User {user1_id}:")
-                result.append([suggested for suggested in suggested_follows])
-        else:
-            result.append("Suggested Follows: Specify user_id to get suggested follows.")
+                result.append("Suggested Follows: Specify user_id to get suggested follows.")
         result.append("-" * 30)
 
         # Posts by Topic

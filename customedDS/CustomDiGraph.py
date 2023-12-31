@@ -98,12 +98,13 @@ class CustomDiGraph:
                 positions.set(node, positions.get(node) + (displacements.get(node) / norm * min(norm, repulsion_factor)))
 
         # Normalize positions to [0, 1] range
-        x_min, y_min = np.min(positions.Values(), axis=0)
-        x_max, y_max = np.max(positions.Values(), axis=0)
-        for node, (x, y) in positions.items():
-            x = (x - x_min) / (x_max - x_min)
-            y = (y - y_min) / (y_max - y_min)
-            positions.set(node, [width * x, height * y])
+        if len(positions) > 1:
+            x_min, y_min = np.min(positions.Values(), axis=0)
+            x_max, y_max = np.max(positions.Values(), axis=0)
+            for node, (x, y) in positions.items():
+                x = (x - x_min) / (x_max - x_min)
+                y = (y - y_min) / (y_max - y_min)
+                positions.set(node, [width * x, height * y])
 
         return positions
 

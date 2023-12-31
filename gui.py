@@ -147,7 +147,7 @@ class Ui :
             self.editor_text_box.edit_redo()
         except:
             pass
-            
+
     def copy_inout(self):
         content = self.output_text_box.get(1.0, tk.END)
         self.editor_text_box.delete(1.0, tk.END)
@@ -251,13 +251,9 @@ class Ui :
     def visualize_social_graph(self):
         xml_content = self.editor_text_box.get(1.0, tk.END)
         if (xml_content == self.content_that_built_the_graph):
-            try:
-                self.social_graph.visualize_graph()
-            except:
-                self.show_error("Some error occured. There must be at\nleast 2 users to visualize graph.\nAnd the file must be correct XML.")
+            self.social_graph.visualize_graph()
         else:
             self.show_error("Please build the social graph first.")
-
 
     def search_posts_by_topic(self):
         # Get the topic from the entry widget
@@ -290,15 +286,13 @@ class Ui :
             user2_id = self.user2Entry.get()
             topic = self.topicEntry.get()
 
-            try:
-                # Perform network analysis with user-specified parameters
-                result = self.social_graph.print_network_analysis(user1_id, user2_id, topic)
+            # Perform network analysis with user-specified parameters
+            result = self.social_graph.print_network_analysis(user1_id, user2_id, topic)
 
-                # Display the result in the output text box
-                self.show_result("Network Analysis", result)
-                self.last_function_performed_output_extension = ".txt"
-            except:
-                self.show_error("Some error occured. Try again with\na correct file.")
+            # Display the result in the output text box
+            self.show_result("Network Analysis", result)
+            self.last_function_performed_output_extension = ".txt"
+
 
     def show_result(self, title, result):
         self.output_text_box.configure(state='normal')

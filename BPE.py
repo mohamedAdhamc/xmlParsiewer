@@ -43,7 +43,7 @@ class BPE():
         self.__unique_file_data = []
         self.__available_characters = []
         self.__frequencies = [0] * 256 * 256
-        self.__all_bytes = [i.to_bytes() for i in range(256)]
+        self.__all_bytes = [i.to_bytes(length = 1, byteorder='big') for i in range(256)]
 
     def __get_replacement(self) -> bytes:
         """ Get a replacement byte from available characters"""
@@ -58,8 +58,8 @@ class BPE():
         """Check if the byte is in the lookup table and get the original byte before decompression"""
 
         if (b in table.Keys()):
-            b1 = self.__get_original(table.get(b)[0].to_bytes(), table)
-            b2 = self.__get_original(table.get(b)[1].to_bytes(), table)
+            b1 = self.__get_original(table.get(b)[0].to_bytes(length = 1, byteorder='big'), table)
+            b2 = self.__get_original(table.get(b)[1].to_bytes(length = 1, byteorder='big'), table)
             return b1 + b2
         return b
 
@@ -71,7 +71,7 @@ class BPE():
 
         table = CustomDict()
         for i in range(0, 3 * byte_len, 3):
-            table.set(table_chunk[i].to_bytes(), table_chunk[i + 1].to_bytes() + table_chunk[i + 2].to_bytes())
+            table.set(table_chunk[i].to_bytes(length = 1, byteorder='big'), table_chunk[i + 1].to_bytes(length = 1, byteorder='big') + table_chunk[i + 2].to_bytes(length = 1, byteorder='big'))
         return table
 
     def compress(self, text: str, file_path, iterations = None):
@@ -129,7 +129,7 @@ class BPE():
                 _iter += 1
                 iterate = _iter < iterations
 
-        replacement_length = (len(self.__lookup_table)).to_bytes()
+        replacement_length = (len(self.__lookup_table)).to_bytes(length = 1, byteorder='big')
 
         with open(file=file_path+".xip", mode="wb") as compressed_file:
             # Write length of the bytes used for compression
@@ -154,7 +154,7 @@ class BPE():
 
         # Iterate through every file in the compressed file and find every byte in the lookup table recursively
         for i in range(1, data_len):
-            decompressed_data += self.__get_original(compressed_file_data[i].to_bytes(), reconstruction_dict)
+            decompressed_data += self.__get_original(compressed_file_data[i].to_bytes(length = 1, byteorder='big'), reconstruction_dict)
 
         print("Decompressed!")
         return decompressed_data.decode("utf8")
