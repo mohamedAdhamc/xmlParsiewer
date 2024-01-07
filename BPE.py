@@ -151,7 +151,7 @@ class BPE():
         with open(file=filename, mode="rb") as file_binary:
             compressed_file_data = file_binary.read()
 
-        decompressed_data = b""
+        decompressed_data = []
 
         # Use the redundant information to construct dict before decompression
         reconstruction_dict = self.__reconstruct_dict(compressed_file_data)
@@ -159,10 +159,10 @@ class BPE():
 
         # Iterate through every file in the compressed file and find every byte in the lookup table recursively
         for i in range(1, data_len):
-            decompressed_data += self.__get_original(compressed_file_data[i].to_bytes(length = 1, byteorder='big'), reconstruction_dict)
+            decompressed_data.append(self.__get_original(compressed_file_data[i].to_bytes(length = 1, byteorder='big'), reconstruction_dict))
 
         print("Decompressed!")
-        return decompressed_data.decode("utf8")
+        return b"".join(decompressed_data).decode("utf8")
         # with open(file=filename.replace(".xip", "_decompressed.xml"), mode="wb") as decompressed_file:
             # decompressed_file.write(decompressed_data)
 
