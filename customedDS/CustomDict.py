@@ -18,36 +18,9 @@ class CustomDict:
         - size (int): The initial size of the list of buckets.
         - buckets (list): A list of buckets, where each bucket is a list of key-value pairs.
         """
-        self.size = 4999  # Choose an initial size for the list of buckets
+        self.size = 1000  # Choose an initial size for the list of buckets
         self.buckets = [[] for _ in range(self.size)]
-
-    def hash_function(self, key):
-        """
-        Custom hash function for both strings and numbers.
-
-        Parameters:
-        - key: The key (either string or number or bytes) to be hashed.
-
-        Returns:
-        An integer hash value computed based on the input key.
-        """
-        if isinstance(key, str):
-            # Handle string keys
-            hash_value = 0
-            for char in key:
-                hash_value = (hash_value * 31 + ord(char)) % self.size
-
-        elif isinstance(key, bytes):
-            # Handle bytes keys
-            hash_value = 0
-            for char in key:
-                hash_value = (hash_value * 31 + int(char)) % self.size
-
-        else:
-            # Handle numeric keys
-            hash_value = key % self.size
-
-        return hash_value
+        self.length = 0
 
     def set(self, key, value):
         """
@@ -57,17 +30,14 @@ class CustomDict:
         - key: The key to be set.
         - value: The value to be associated with the key.
         """
-        hash_value = self.hash_function(key)
-        bucket = self.buckets[hash_value]
-
-        for i, (k, v) in enumerate(bucket):
-            if k == key:
-                # Update value if key already exists
-                bucket[i] = (key, value)
-                return
-
-        # Add a new key-value pair if the key is not present
-        bucket.append((key, value))
+        storage_idx = hash(key) % self.size
+        for ele in self.buckets[storage_idx]:
+            if key == ele[0]:  # already exist, update it
+                ele[1] = value
+                break
+        else:
+            self.buckets[storage_idx].append([key, value])
+            self.length += 1
 
     def get(self, key, default=None):
         """
@@ -80,12 +50,10 @@ class CustomDict:
         Returns:
         The value associated with the key, or the default value if the key is not present.
         """
-        hash_value = self.hash_function(key)
-        bucket = self.buckets[hash_value]
-
-        for k, v in bucket:
-            if k == key:
-                return v
+        storage_idx = hash(key) % self.size
+        for ele in self.buckets[storage_idx]:
+            if ele[0] == key:
+                return ele[1]
 
         return default
 
@@ -116,6 +84,47 @@ class CustomDict:
         """
         return [k for bucket in self.buckets for k, v in bucket]
 
+    def __iterate_kv(self):
+        """
+        return an iterator
+        :return: generator
+        """
+        for sub_lst in self.storage:
+            if not sub_lst:
+                continue
+            for item in sub_lst:
+                yield item
+
+    def __iter__(self):
+        """
+        return an iterator
+        :return: generator
+        """
+        for key_var in self.__iterate_kv():
+            yield key_var[0]
+
+    def Keys_iter(self):
+        """
+        get all keys as list
+        :return: list
+        """
+        return self.__iter__()
+
+    def Values_iter(self):
+        """
+        get all values as list
+        :return: list
+        """
+        for key_var in self.__iterate_kv():
+            yield key_var[1]
+
+    def items_iter(self):
+        """
+        get all k:v as list
+        :return: list
+        """
+        return self.__iterate_kv()
+
     def __contains__(self, key):
         """
         Check if the dictionary contains a key.
@@ -126,13 +135,10 @@ class CustomDict:
         Returns:
         True if the key is present; False otherwise.
         """
-        hash_value = self.hash_function(key)
-        bucket = self.buckets[hash_value]
-
-        for k, v in bucket:
-            if k == key:
+        storage_idx = hash(key) % self.size
+        for item in self.buckets[storage_idx]:
+            if item[0] == key:
                 return True
-
         return False
 
     def __iter__(self):
@@ -151,7 +157,7 @@ class CustomDict:
         Returns:
         The number of key-value pairs in the dictionary.
         """
-        return sum(len(bucket) for bucket in self.buckets)
+        return self.length
 
     def __repr__(self):
         """
