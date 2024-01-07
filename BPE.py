@@ -1,5 +1,6 @@
 # from functools import reduce
 from customedDS.CustomDict import CustomDict
+from customedDS.newCustom import Dictionary
 import cProfile
 import pstats
 
@@ -57,9 +58,11 @@ class BPE():
     def __get_original(self, b: bytes, table):
         """Check if the byte is in the lookup table and get the original byte before decompression"""
 
-        if (b in table.Keys()):
-            b1 = self.__get_original(table.get(b)[0].to_bytes(length = 1, byteorder='big'), table)
-            b2 = self.__get_original(table.get(b)[1].to_bytes(length = 1, byteorder='big'), table)
+        if (b in table.keys()):
+            # b1 = self.__get_original(table.get(b)[0].to_bytes(length = 1, byteorder='big'), table)
+            # b2 = self.__get_original(table.get(b)[1].to_bytes(length = 1, byteorder='big'), table)
+            b1 = self.__get_original(table[b][0].to_bytes(length = 1, byteorder='big'), table)
+            b2 = self.__get_original(table[b][1].to_bytes(length = 1, byteorder='big'), table)
             return b1 + b2
         return b
 
@@ -69,9 +72,11 @@ class BPE():
         byte_len = data[0]
         table_chunk = data[(-3 * byte_len):]
 
-        table = CustomDict()
+        # table = CustomDict()
+        table = Dictionary()
         for i in range(0, 3 * byte_len, 3):
-            table.set(table_chunk[i].to_bytes(length = 1, byteorder='big'), table_chunk[i + 1].to_bytes(length = 1, byteorder='big') + table_chunk[i + 2].to_bytes(length = 1, byteorder='big'))
+            # table.set(table_chunk[i].to_bytes(length = 1, byteorder='big'), table_chunk[i + 1].to_bytes(length = 1, byteorder='big') + table_chunk[i + 2].to_bytes(length = 1, byteorder='big'))
+            table[table_chunk[i].to_bytes(length = 1, byteorder='big')] = table_chunk[i + 1].to_bytes(length = 1, byteorder='big') + table_chunk[i + 2].to_bytes(length = 1, byteorder='big')
         return table
 
     def compress(self, text: str, file_path, iterations = None):
