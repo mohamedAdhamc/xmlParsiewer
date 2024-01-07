@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import filedialog
 #for getting the file name from path
 import os
+#for matplotlib
+import matplotlib.backends.backend_tkagg
 #for program features
 from formatting import minify, prettify
 from xml2json import xml2json
@@ -251,7 +253,10 @@ class Ui :
     def visualize_social_graph(self):
         xml_content = self.editor_text_box.get(1.0, tk.END)
         if (xml_content == self.content_that_built_the_graph):
-            self.social_graph.visualize_graph()
+            try:
+                self.social_graph.visualize_graph()
+            except:
+                self.show_error("The file must be correct XML.")
         else:
             self.show_error("Please build the social graph first.")
 
@@ -281,17 +286,20 @@ class Ui :
         if (xml_content != self.content_that_built_the_graph):
             self.show_error("Please build the social graph first.")
         else:
-            # Get user-specified parameters
-            user1_id = self.user1Entry.get()
-            user2_id = self.user2Entry.get()
-            topic = self.topicEntry.get()
+            try:
+                # Get user-specified parameters
+                user1_id = self.user1Entry.get()
+                user2_id = self.user2Entry.get()
+                topic = self.topicEntry.get()
 
-            # Perform network analysis with user-specified parameters
-            result = self.social_graph.print_network_analysis(user1_id, user2_id, topic)
+                # Perform network analysis with user-specified parameters
+                result = self.social_graph.print_network_analysis(user1_id, user2_id, topic)
 
-            # Display the result in the output text box
-            self.show_result("Network Analysis", result)
-            self.last_function_performed_output_extension = ".txt"
+                # Display the result in the output text box
+                self.show_result("Network Analysis", result)
+                self.last_function_performed_output_extension = ".txt"
+            except:
+                self.show_error("The file must be correct XML.")
 
 
     def show_result(self, title, result):
