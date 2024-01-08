@@ -24,13 +24,35 @@ In the following sections we will explore the main functions of the app.
 
    JSON is another popular format for storing data, and a tool that can convert between XML and JSON would be useful. This is exactly what this does. It accepts any XML file with correct syntax, and outputs the corresponding JSON representation.
 
-5. Compression and decompression:
+4. Compression and decompression:
 
-6. Error detection and correction:
+   Compression is implemented using the “Byte Pair Encoding” lossless technique. BPE offers a high compression ratio and moderate processing time. It works by scanning through the input text, and finding the most common pair of characters. The most frequent is replaced by a single new character. This process is repeated until the text is no longer compressible (i.e. there are no repeating pairs), or the available character space is depleted.
 
-7. Social graph analysis:
+5. Error detection and correction:
+
+   A) Error detection:
+   This checks if there were any closed tags, opening tags or unmatched tags. The xml_error_detection function takes xml_string as an input then checking its consistency then the output of the function is a string contains errors that was found in xml_string.
+
+   B) Error correction:
+   This function corrects the errors (missing opening or closing tags) in a syntax-error-free XML file. If there are no errors, the output is just the prettified input.
+
+6. Social graph analysis:
+
+   A) Build social graph:
+   This is an essential step to any of the following features. It optimizes computation time instead of re-building the social graph on every function call.
+
+   B) Visualize social graph:
+   Using matplotlib, the user can visualize the built social graph where the connections between different users (who follows whom) are represented using lines and arrowheads.
+
+   C) Search posts by topic:
+   This allows the user to find all posts that are on a specific topic. The user can enter the preferred topic in the entry box below the button. For the example below, user entered “economy”.
+
+   D) Network analysis:
+   Network analysis includes finding the most influential and active users, mutual followers, suggested follows, and searching posts by topic using various graph and user methods. Output is best shown by example, entry boxes for user IDs are provided, in this example, the user entered 2 and 3:
 
 8. Undo and redo:
+
+   Little needs to be said here. Undo and redo are implemented internally via a stack, and every change to the input text is recorded. Note that changes only count after an enter has been pressed.
 
 
 ## Supporting data structures and classes
