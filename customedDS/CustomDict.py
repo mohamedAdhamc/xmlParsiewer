@@ -89,7 +89,7 @@ class CustomDict:
         return an iterator
         :return: generator
         """
-        for sub_lst in self.storage:
+        for sub_lst in self.buckets:
             if not sub_lst:
                 continue
             for item in sub_lst:
